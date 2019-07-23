@@ -3,6 +3,8 @@ package sg.edu.rp.c346.reservation;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -24,11 +26,9 @@ public class MainActivity extends AppCompatActivity {
     TimePicker timePicker;
     Button btReserve, btReset;
 
-    int day;
-    int month;
-    int year;
-    int hour;
-    int minute;
+    int day,month, year,hour,minute;
+
+    String dateS, timeS;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,9 +50,6 @@ public class MainActivity extends AppCompatActivity {
 
         btReserve = findViewById(R.id.buttonReserve);
         btReset = findViewById(R.id.buttonReset);
-
-
-
 
 
         btReserve.setOnClickListener(new View.OnClickListener() {
@@ -86,10 +83,6 @@ public class MainActivity extends AppCompatActivity {
                 AlertDialog myDialog = myBuilder.create();
                 myDialog.show();
 
-////
-//                String message = "Hi, "+ etName.getText().toString()+"you have booked a "+ etSize.getText().toString() +" person(s)" +
-////                        isSmoke +" table on"+ etDate.getText().toString() + etTime.getText().toString() + ". Your phone number is " + etTelephone.getText().toString();
-
 //                Toast.makeText(MainActivity.this,
 //                        "Hi, " + etName.getText().toString() + ", you have booked a "
 //                                + etSize.getText().toString() + " person(s) "
@@ -120,6 +113,7 @@ public class MainActivity extends AppCompatActivity {
                 DatePickerDialog.OnDateSetListener myDateListener = new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                        dateS = dayOfMonth + "/" + (month + 1) + "/" + year;
                         etDate.setText(dayOfMonth + "/" + (month + 1) + "/" + year);
                     }
                 };
@@ -141,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
                 TimePickerDialog.OnTimeSetListener myTimeListener = new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                        timeS = hourOfDay + ":" + minute;
                         etTime.setText(hourOfDay + ":" + minute);
                     }
                 };
@@ -158,12 +153,47 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onPause(){
-        super.onPause();
+    protected void onResume(){
+        super.onResume();
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String getName = prefs.getString("Name",null);
+        String getTele = prefs.getString("Tele",null);
+        String getSize = prefs.getString("Size", null);
+        String getDate = prefs.getString("Date",null);
+        String getTime = prefs.getString("Time", null);
+        Boolean getSmoke = prefs.getBoolean("Smoke",false);
+
+
+        etName.setText(getName);
+        etTelephone.setText(getTele);
+        etSize.setText(getSize);
+        etDate.setText(getDate);
+        etTime.setText(getTime);
+        checkBox.setChecked(getSmoke);
     }
 
     @Override
-    protected void onResume(){
-        super.onResume();
+    protected void onPause(){
+        super.onPause();
+
+        String shareName = etName.getText().toString();
+        String shareTele = etTelephone.getText().toString();
+        String shareSize = etSize.getText().toString();
+
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor prefEdit = prefs.edit();
+
+        prefEdit.putString("Name",shareName);
+        prefEdit.putString("Tele",shareTele);
+        prefEdit.putString("Size",shareSize);
+        prefEdit.putString("Date",dateS);
+        prefEdit.putString("Time",timeS);
+        prefEdit.putBoolean("Smoke",checkBox.isChecked());
+
+        prefEdit.commit();
     }
+
+
 }
